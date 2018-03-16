@@ -5,7 +5,6 @@ function readyNow () {
     $('#submitButton').on('click', submitGame); 
     //person access the page & it immediatly loads all games ~ don't need to add a game to see the list
     getAllGames() 
-    
 }
 
 function getAllGames() {
@@ -14,7 +13,6 @@ function getAllGames() {
         url: '/game'
     }).done(function(response){
         appendToDom(response); //the response is our gameCollection array 
-
     })
 }
 
@@ -23,13 +21,19 @@ function appendToDom (gameCollection) {
     for (let game of gameCollection) {
         console.log('in appendToDom, GAME:', game); 
         let tr = $('<tr></tr>');
-        tr.append('<td>' + game.name + '</td>');
-        tr.append('<td>' + game.cost + '</td>'); 
-        $('#gameContent').append(tr); 
-    }
+            if(game.isClearance) {
+                tr.append('<td class="clearance">' + game.name + '</td>');
+                tr.append('<td class="clearance">' + game.cost + '</td>'); 
+            }else {
+                tr.append('<td>' + game.name + '</td>');
+                tr.append('<td>' + game.cost + '</td>'); 
+            }
+            $('#gameContent').append(tr); 
+        }
 
 }
-
+    
+    
 
 function submitGame () {
     let gameName = $('#gameName').val(); 
@@ -39,18 +43,15 @@ function submitGame () {
         type: 'POST',
         data: gameToSend, 
         url: '/game'
-
     }).done(function(response){
         //response from a POST will just be '200' success
         //the .done functionw WILL NOT RUN until a response comes back from the server 
         console.log('SUCCESS');
         getAllGames(); 
         //based on the status code from the server, AJAX knows which function to call (done vs. fail)
-
     }).fail (function(response) {
         //this is an if/else jQuery is running based on the status code 
         alert('Something went wrong...'); 
-
     })
 }
 

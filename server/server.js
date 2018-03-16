@@ -14,8 +14,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static('server/public')); 
 
 
-
-
 //send back all the games 
 app.get('/game', (req, res) => {
     res.send(gameCollection); 
@@ -25,12 +23,29 @@ app.get('/game', (req, res) => {
 app.post('/game', (req, res) => {
     console.log(req.body); 
     let gameToAdd = req.body; //properties of body.name & body.cost
+    let gameName = gameToAdd.name; 
+    let gameCost = parseFloat(gameToAdd.cost); 
+    gameToAdd.isClearance = isClearance(gameCost); 
+    isClearance(gameCost); 
+    console.log(gameToAdd);
     gameCollection.push(gameToAdd); 
     console.log(gameCollection);
     
     res.sendStatus(200); //<---- success status code 
 
 });
+
+function isClearance(cost) {
+    //19.99 or 19.00?? 
+    //19.99 - 19 = .99
+    //19.00 - 19 = 0
+    if (cost - Math.floor(cost) === 0) {
+        return true; 
+    }  
+    else {
+        return false; 
+    }   
+}; 
 
 
 //spin up the server
