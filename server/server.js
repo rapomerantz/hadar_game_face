@@ -1,8 +1,27 @@
 let express = require('express'); 
 let app = express(); 
-const PORT = 4001; 
+// const PORT = 4001; 
+//left: for heroku - right: else
+const PORT = process.env.PORT || 4001;
+const gameRouter = require('./routes/game.router.js'); 
+
+//MONGODB CODE -- START
+const mongoose = require('mongoose'); 
+//connect to mongodb on port 27017 with db of hadar 
+const databaseUrl = 'mongodb://localhost:27017/hadar'; 
+
+mongoose.connect(databaseUrl); //<-- actually connect to databse
+
+//below: EVENT HANDLERS for connection and failure to connect to mongodb
+mongoose.connection.on('connected', () => {
+    console.log('conneted to mongodb!!');
+})
+mongoose.connection.on('error', (err) => {
+    console.log('Error connecting to mongodb', err); 
+})
+
+
 let bodyParser = require('body-parser'); 
-const gameCollection = []; //contains objects {name: 'game name', cost: 0.99}
 
 
 //configures the bodyParser for jQuery 
@@ -10,42 +29,17 @@ const gameCollection = []; //contains objects {name: 'game name', cost: 0.99}
 app.use(bodyParser.urlencoded({extended: true}));
 
 
+
+//set up gameRouter
+app.use('/game', gameRouter); 
+
 //Server static files
 app.use(express.static('server/public')); 
 
 
-//send back all the games 
-app.get('/game', (req, res) => {
-    res.send(gameCollection); 
-});
 
-//when we want to add a new game
-app.post('/game', (req, res) => {
-    console.log(req.body); 
-    let gameToAdd = req.body; //properties of body.name & body.cost
-    let gameName = gameToAdd.name; 
-    let gameCost = parseFloat(gameToAdd.cost); 
-    gameToAdd.isClearance = isClearance(gameCost); 
-    isClearance(gameCost); 
-    console.log(gameToAdd);
-    gameCollection.push(gameToAdd); 
-    console.log(gameCollection);
-    
-    res.sendStatus(200); //<---- success status code 
 
-});
 
-function isClearance(cost) {
-    //19.99 or 19.00?? 
-    //19.99 - 19 = .99
-    //19.00 - 19 = 0
-    if (cost - Math.floor(cost) === 0) {
-        return true; 
-    }  
-    else {
-        return false; 
-    }   
-}; 
 
 
 //spin up the server
